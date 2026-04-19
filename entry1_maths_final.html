@@ -1,0 +1,689 @@
+
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --fs-xs:14px; --fs-sm:16px; --fs-base:18px; --fs-md:20px;
+  --fs-lg:24px; --fs-xl:28px; --fs-2xl:34px;
+  --q-blue:#1d6fcf; --q-blue-bg:#e8f1fc;
+  --sec-a:#0e7f5e; --sec-b:#7c3aed;
+  --radius:12px; --radius-sm:8px;
+  --touch:52px;
+}
+@media(max-width:480px){
+  :root{--fs-xs:13px;--fs-sm:15px;--fs-base:17px;--fs-md:19px;--fs-lg:22px;--fs-xl:25px;--fs-2xl:28px;}
+}
+body{font-size:var(--fs-base);}
+
+.wrap{max-width:660px;margin:0 auto;padding:16px 14px 40px;}
+
+/* TOPIC CARDS */
+.topic-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+@media(max-width:500px){.topic-grid{grid-template-columns:repeat(2,1fr);}}
+.topic-card{border-radius:var(--radius-sm);padding:13px 12px;border:2px solid var(--color-border-tertiary);background:var(--color-background-primary);cursor:pointer;transition:all 0.15s;}
+.topic-card:hover,.topic-card:active{border-color:var(--q-blue);background:var(--q-blue-bg);}
+.topic-icon{font-size:26px;line-height:1;display:block;margin-bottom:6px;}
+.topic-label{font-size:var(--fs-sm);font-weight:600;color:var(--q-blue);display:block;margin-bottom:3px;}
+.topic-desc{font-size:var(--fs-xs);color:var(--color-text-secondary);line-height:1.4;display:block;}
+
+/* BACK BAR */
+.back-bar{display:flex;align-items:center;gap:12px;padding:14px 16px;background:var(--color-background-secondary);border:2px solid var(--color-border-secondary);border-radius:var(--radius);margin-bottom:16px;cursor:pointer;transition:border-color 0.15s;min-height:var(--touch);}
+.back-bar:hover{border-color:var(--q-blue);}
+.back-bar-arrow{font-size:24px;color:var(--q-blue);}
+.back-bar-title{font-size:var(--fs-md);font-weight:600;color:var(--q-blue);}
+.back-bar-sub{font-size:var(--fs-xs);color:var(--color-text-secondary);}
+
+/* QUESTION BOX */
+.qbox{background:var(--color-background-primary);border:2px solid var(--color-border-tertiary);border-radius:var(--radius);padding:22px 20px 20px;margin-bottom:14px;transition:border-color 0.2s;}
+.qbox.correct{border-color:#16a34a;}
+.qbox.wrong{border-color:#dc2626;}
+.qbox-num{font-size:var(--fs-xs);font-weight:700;color:var(--q-blue);text-transform:uppercase;letter-spacing:0.08em;}
+.qbox-ctx{font-size:var(--fs-base);color:var(--color-text-secondary);line-height:1.65;margin:10px 0 6px;}
+.qbox-q{font-size:var(--fs-lg);font-weight:700;color:var(--q-blue);line-height:1.45;margin:8px 0 18px;}
+.qbox-divider{border-top:2px solid var(--color-border-tertiary);padding-top:16px;}
+
+/* BUTTONS */
+.btn-check{width:100%;padding:16px;font-size:var(--fs-md);font-weight:700;border:none;border-radius:var(--radius-sm);background:var(--q-blue);color:#fff;cursor:pointer;margin-bottom:12px;min-height:var(--touch);letter-spacing:0.02em;transition:opacity 0.15s;}
+.btn-check:disabled{opacity:0.4;cursor:default;}
+.btn-check:hover:not(:disabled){opacity:0.88;}
+.btn-nav{padding:12px 20px;font-size:var(--fs-base);font-weight:600;border-radius:var(--radius-sm);cursor:pointer;min-height:var(--touch);transition:opacity 0.15s;}
+.btn-nav:disabled{opacity:0.35;cursor:default;}
+.btn-nav.outline{border:2px solid var(--color-border-secondary);background:var(--color-background-primary);color:var(--color-text-primary);}
+.btn-nav.solid{border:none;background:var(--q-blue);color:#fff;}
+.btn-nav.solid:disabled{background:var(--color-border-secondary);}
+
+/* FEEDBACK */
+.feedback{border-radius:var(--radius-sm);padding:16px 18px;margin-bottom:12px;display:flex;gap:14px;align-items:flex-start;}
+.feedback.ok{background:#f0fdf4;border:2px solid #16a34a;}
+.feedback.bad{background:#fef2f2;border:2px solid #dc2626;}
+.feedback-icon{font-size:28px;line-height:1;flex-shrink:0;}
+.feedback-title{font-size:var(--fs-md);font-weight:700;margin-bottom:5px;}
+.feedback.ok .feedback-title{color:#15803d;}
+.feedback.bad .feedback-title{color:#b91c1c;}
+.feedback-text{font-size:var(--fs-base);line-height:1.6;}
+.feedback.ok .feedback-text{color:#166534;}
+.feedback.bad .feedback-text{color:#991b1b;}
+
+/* SPEAK BUTTON */
+.sp-btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:20px;border:2px solid var(--color-border-secondary);background:none;cursor:pointer;font-size:var(--fs-sm);color:var(--color-text-secondary);min-height:40px;transition:all 0.15s;}
+.sp-btn:hover{background:var(--color-background-secondary);border-color:var(--q-blue);color:var(--q-blue);}
+.sp-btn.on{background:#eff6ff;border-color:var(--q-blue);color:var(--q-blue);}
+.sp-err{font-size:var(--fs-xs);color:#dc2626;margin-top:6px;}
+
+/* PROGRESS */
+.prog-bar-wrap{height:8px;border-radius:4px;background:var(--color-background-secondary);overflow:hidden;margin-bottom:16px;}
+.prog-bar{height:100%;border-radius:4px;background:var(--q-blue);transition:width 0.3s;}
+
+/* INPUTS */
+.inp{border:2px solid var(--color-border-secondary);border-radius:var(--radius-sm);padding:10px 14px;font-size:var(--fs-base);background:var(--color-background-primary);color:var(--color-text-primary);min-height:var(--touch);}
+.inp:disabled{opacity:0.6;}
+
+/* MC */
+.mc-grid{display:grid;gap:10px;margin-top:6px;}
+.mc-grid.cols2{grid-template-columns:1fr 1fr;}
+@media(max-width:420px){.mc-grid.cols2{grid-template-columns:1fr;}}
+.mc-opt{display:flex;align-items:center;gap:12px;padding:14px 16px;border:2px solid var(--color-border-tertiary);border-radius:var(--radius-sm);cursor:pointer;font-size:var(--fs-base);transition:all 0.15s;min-height:var(--touch);}
+.mc-opt:hover:not(.locked){border-color:var(--q-blue);background:var(--q-blue-bg);}
+.mc-opt.sel{border-color:var(--q-blue);background:var(--q-blue-bg);color:var(--q-blue);font-weight:600;}
+.mc-opt.locked:not(.sel){opacity:0.5;cursor:default;}
+.mc-dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--color-border-secondary);flex-shrink:0;}
+.mc-opt.sel .mc-dot{background:var(--q-blue);border-color:var(--q-blue);}
+
+/* SHAPE GRID */
+.shape-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.shape-opt{display:flex;flex-direction:column;align-items:center;gap:8px;padding:16px 10px;border:2px solid var(--color-border-tertiary);border-radius:var(--radius-sm);cursor:pointer;transition:all 0.15s;}
+.shape-opt:hover:not(.locked){border-color:var(--q-blue);background:var(--q-blue-bg);}
+.shape-opt.sel{border-color:var(--q-blue);background:var(--q-blue-bg);}
+.shape-opt.locked:not(.sel){opacity:0.5;cursor:default;}
+.shape-label{font-size:var(--fs-sm);font-weight:600;color:var(--q-blue);}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-radius:var(--radius-sm);margin-bottom:14px;}
+.sec-hdr.a{background:#ecfdf5;border:2px solid #6ee7b7;}
+.sec-hdr.b{background:#f5f3ff;border:2px solid #c4b5fd;}
+.sec-hdr-label{font-size:var(--fs-md);font-weight:700;}
+.sec-hdr.a .sec-hdr-label{color:var(--sec-a);}
+.sec-hdr.b .sec-hdr-label{color:var(--sec-b);}
+.sec-hdr-sub{font-size:var(--fs-xs);margin-top:2px;}
+.sec-hdr.a .sec-hdr-sub{color:var(--sec-a);}
+.sec-hdr.b .sec-hdr-sub{color:var(--sec-b);}
+.sec-badge{font-size:var(--fs-xl);font-weight:800;padding:4px 14px;border-radius:6px;}
+.sec-hdr.a .sec-badge{color:var(--sec-a);background:#d1fae5;}
+.sec-hdr.b .sec-badge{color:var(--sec-b);background:#ede9fe;}
+
+/* RESULTS */
+.score-card{background:var(--color-background-secondary);border-radius:var(--radius-sm);padding:18px;text-align:center;}
+.score-num{font-size:var(--fs-2xl);font-weight:800;color:var(--q-blue);}
+.score-lbl{font-size:var(--fs-sm);color:var(--color-text-secondary);margin-top:4px;}
+.result-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--color-border-tertiary);cursor:pointer;}
+.result-row:hover{background:var(--q-blue-bg);margin:0 -8px;padding:12px 8px;border-radius:6px;}
+.result-num{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:var(--fs-sm);font-weight:700;flex-shrink:0;}
+.result-num.ok{background:#dcfce7;color:#15803d;}
+.result-num.bad{background:#fee2e2;color:#b91c1c;}
+.result-q{font-size:var(--fs-base);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.result-ans{font-size:var(--fs-xs);color:var(--color-text-secondary);}
+.result-tick{font-size:var(--fs-md);font-weight:700;flex-shrink:0;}
+.result-tick.ok{color:#16a34a;}
+.result-tick.bad{color:#dc2626;}
+
+/* STATUS PILL */
+.pill{display:inline-flex;align-items:center;padding:4px 12px;border-radius:20px;font-size:var(--fs-xs);font-weight:600;}
+.pill.ok{background:#dcfce7;color:#15803d;}
+.pill.bad{background:#fee2e2;color:#b91c1c;}
+.pill.sec-a{background:#d1fae5;color:var(--sec-a);}
+.pill.sec-b{background:#ede9fe;color:var(--sec-b);}
+</style>
+<div id="root"></div>
+<script>
+const {useState,useEffect,useRef}=React;
+
+/* ── ROBUST SPEECH SYNTHESIS (works on GitHub Pages, iOS, all browsers) ── */
+let _voices=[];
+let _voicesReady=false;
+
+function _loadVoices(){
+  const vs=window.speechSynthesis.getVoices();
+  if(vs.length){_voices=vs;_voicesReady=true;}
+}
+if(window.speechSynthesis){
+  _loadVoices();
+  window.speechSynthesis.onvoiceschanged=()=>{_loadVoices();};
+  // Some browsers need a delay
+  setTimeout(_loadVoices,500);
+  setTimeout(_loadVoices,1500);
+}
+
+// iOS keep-alive: prevent synthesis cutting out after ~15s
+let _iosKeepAlive=null;
+function _startKeepAlive(){
+  if(!/iphone|ipad|ipod/i.test(navigator.userAgent))return;
+  clearInterval(_iosKeepAlive);
+  _iosKeepAlive=setInterval(()=>{
+    if(window.speechSynthesis.speaking){
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }else{clearInterval(_iosKeepAlive);}
+  },10000);
+}
+
+function speakGB(text,cb){
+  if(!window.speechSynthesis){cb&&cb();return;}
+  window.speechSynthesis.cancel();
+  const doSpeak=()=>{
+    const u=new SpeechSynthesisUtterance(text);
+    u.lang='en-GB';u.rate=0.88;u.pitch=1.05;u.volume=1;
+    const vs=window.speechSynthesis.getVoices();
+    const gb=vs.find(v=>v.lang==='en-GB'&&/female|karen|serena|moira|libby|hazel/i.test(v.name))
+      ||vs.find(v=>v.lang==='en-GB')
+      ||vs.find(v=>v.lang.startsWith('en-GB'))
+      ||vs.find(v=>v.lang.startsWith('en'));
+    if(gb)u.voice=gb;
+    u.onend=()=>{cb&&cb();clearInterval(_iosKeepAlive);};
+    u.onerror=()=>{cb&&cb();clearInterval(_iosKeepAlive);};
+    window.speechSynthesis.speak(u);
+    _startKeepAlive();
+  };
+  // If voices not loaded yet, wait for them
+  const vs=window.speechSynthesis.getVoices();
+  if(vs.length){doSpeak();}
+  else{
+    let tries=0;
+    const poll=setInterval(()=>{
+      tries++;
+      const v2=window.speechSynthesis.getVoices();
+      if(v2.length||tries>20){clearInterval(poll);doSpeak();}
+    },100);
+  }
+}
+function stopGB(){
+  window.speechSynthesis&&window.speechSynthesis.cancel();
+  clearInterval(_iosKeepAlive);
+}
+
+function SpeakBtn({text}){
+  const[on,setOn]=useState(false);
+  const[err,setErr]=useState(false);
+  const go=()=>{
+    if(!window.speechSynthesis){setErr(true);return;}
+    if(on){stopGB();setOn(false);return;}
+    setErr(false);setOn(true);
+    speakGB(text,()=>setOn(false));
+  };
+  return React.createElement("div",{style:{display:"inline-flex",flexDirection:"column",alignItems:"flex-start"}},
+    React.createElement("button",{className:"sp-btn"+(on?" on":""),onClick:go,type:"button"},
+      React.createElement("span",null,on?"⏹":"🔊"),
+      React.createElement("span",null,on?"Stop":"Listen")
+    ),
+    err&&React.createElement("span",{className:"sp-err"},"Audio not supported in this browser")
+  );
+}
+
+/* ── DATA ── */
+const norm=s=>(s||"").toLowerCase().trim().replace(/[£\s]/g,"");
+
+const TOPICS_A=[
+  {icon:"➕",label:"Addition",desc:"Add two numbers together",qIdx:0},
+  {icon:"✔",label:"Checking subtraction",desc:"Is the calculation correct?",qIdx:1},
+  {icon:"🔢",label:"Adding two groups",desc:"Find the total",qIdx:2},
+];
+const TOPICS_B=[
+  {icon:"📅",label:"Days of the week",desc:"Count forward to find a day",qIdx:3},
+  {icon:"🕐",label:"Telling the time",desc:"Read an analogue clock",qIdx:4},
+  {icon:"🔷",label:"2D shapes",desc:"Identify a rectangle",qIdx:5},
+  {icon:"🔢",label:"Ordering numbers",desc:"Smallest to largest",qIdx:6},
+  {icon:"📍",label:"Position",desc:"Under, above, left, right",qIdx:7},
+  {icon:"💷",label:"Price list",desc:"Find a price from a table",qIdx:8},
+  {icon:"🐞",label:"Counting objects",desc:"Count items in a picture",qIdx:9},
+  {icon:"⚖️",label:"Comparing weight",desc:"Find the lightest",qIdx:10},
+  {icon:"💰",label:"Adding money",desc:"Total with £ symbol",qIdx:11},
+  {icon:"🧮",label:"Number sentences",desc:"Write +/− correctly",qIdx:12},
+  {icon:"🪴",label:"Count from picture",desc:"Count grouped objects",qIdx:13},
+  {icon:"✅",label:"Checking answers",desc:"Use the inverse",qIdx:14},
+  {icon:"📊",label:"Tally charts",desc:"Read and compare tallies",qIdx:15},
+  {icon:"📈",label:"Bar charts",desc:"Read and complete",qIdx:16},
+];
+
+const QUESTIONS=[
+  {id:"a1",sec:"A",q:"What is 15 add 4?",ctx:"Priya works at a garden centre. She counts bags of compost on the shelf.",audio:"Priya works at a garden centre. She counts bags of compost on the shelf. What is 15 add 4?",check:(a)=>(a.a1||"").trim()==="19",fb:{ok:"Well done! 15 add 4 is 19.",bad:"Not quite. 15 add 4 equals 19. Try counting on from 15."}},
+  {id:"a2",sec:"A",q:"Is Priya correct? Show why you think this.",ctx:"Priya has 20 plant labels. She uses 8. She thinks there are 11 left.",audio:"Priya has 20 plant labels. She uses 8 plant labels. She thinks there are 11 plant labels left. Is Priya correct? Work out 20 take away 8, then tick yes or no.",check:(a)=>(a.a2n||"").trim()==="12"&&norm(a.a2yn)==="no",fb:{ok:"That's right. 20 take away 8 equals 12, so Priya is not correct.",bad:"Have another look. 20 take away 8 is 12, not 11. So the answer is No."}},
+  {id:"a3",sec:"A",q:"How many rows of seeds does she plant in total?",ctx:"Priya plants 6 rows of red flower seeds and 7 rows of yellow flower seeds.",audio:"Priya plants 6 rows of red flower seeds and 7 rows of yellow flower seeds. How many rows of seeds does she plant in total?",check:(a)=>(a.a3||"").trim()==="13",fb:{ok:"Excellent! 6 add 7 equals 13 rows.",bad:"Not quite. 6 plus 7 equals 13. Count on from 6 — seven more takes you to 13."}},
+  {id:"b1",sec:"B",q:"On which day of the week is the next delivery?",ctx:"The garden centre receives a delivery on Monday. The next delivery is two days later.",audio:"The garden centre receives a delivery on Monday. The next delivery is two days later. On which day of the week is the next delivery?",check:(a)=>norm(a.b1||"")==="wednesday",fb:{ok:"Spot on! Monday plus two days is Wednesday.",bad:"Not quite. If Monday is day one, then two days later is Wednesday."}},
+  {id:"b2",sec:"B",q:"What time does the garden centre open?",ctx:"The clock shows the time the garden centre opens.",audio:"The clock shows the time the garden centre opens. What time does the garden centre open? Give your answer in o'clock.",check:(a)=>(a.b2||"").trim()==="9",fb:{ok:"Correct! The short hand points to 9, so it is 9 o'clock.",bad:"Have another look. The short hand points to 9, so the time is 9 o'clock."}},
+  {id:"b3",sec:"B",q:"Which shape is a rectangle?",ctx:"The garden centre sells plant trays. A tray is in the shape of a rectangle.",audio:"The garden centre sells plant trays. A tray is in the shape of a rectangle. Which shape is a rectangle?",check:(a)=>a.b3===0,fb:{ok:"Well done! A rectangle has four sides with two pairs of equal lengths.",bad:"Not quite. The correct answer is the wide flat shape — the rectangle — in the top left."}},
+  {id:"b4",sec:"B",q:"Write these numbers in order starting with the smallest.",ctx:null,audio:"Write these numbers in order from smallest to largest. The numbers are 17 roses, 9 pansies, 14 dahlias, and 11 begonias.",check:(a)=>a.b4_1?.trim()==="9"&&a.b4_2?.trim()==="11"&&a.b4_3?.trim()==="14"&&a.b4_4?.trim()==="17",fb:{ok:"Brilliant! The correct order is 9, 11, 14, 17.",bad:"Not quite. The correct order from smallest to largest is 9, 11, 14, then 17."}},
+  {id:"b5",sec:"B",q:"Where is the trowel?",ctx:"Priya places a trowel near the shelf.",audio:"Priya places a trowel near the shelf. Look at the picture. Where is the trowel?",check:(a)=>a.b5===2,fb:{ok:"Correct! The trowel is underneath the shelf.",bad:"Have another look. The trowel is sitting underneath the shelf."}},
+  {id:"b6",sec:"B",q:"What is the price of a trowel?",ctx:"Priya looks at the prices in the garden centre shop.",audio:"Priya looks at the prices. Seeds 2 pounds. Trowel 5 pounds. Plant pot 3 pounds. Compost 8 pounds. Watering can 7 pounds. What is the price of a trowel?",check:(a)=>norm(a.b6)==="5",fb:{ok:"That's right! A trowel costs 5 pounds.",bad:"Check the price list. A trowel is listed as 5 pounds."}},
+  {id:"b7",sec:"B",q:"How many ladybirds are there?",ctx:"Priya sees ladybirds on the plants.",audio:"Priya sees ladybirds on the plants. Look at the picture and count the ladybirds carefully.",check:(a)=>(a.b7||"").trim()==="8",fb:{ok:"Well counted! There are 8 ladybirds.",bad:"Count again. There are 8 ladybirds — 4 on the top row and 4 on the bottom row."}},
+  {id:"b8",sec:"B",q:"Which bag does Priya choose?",ctx:"Priya buys a bag of seeds. She chooses the lightest bag.",audio:"Priya buys a bag of seeds. She chooses the lightest bag. The bags weigh 24 grams, 18 grams, 15 grams, and 21 grams.",check:(a)=>a.b8===2,fb:{ok:"Correct! 15 grams is the lightest bag.",bad:"Lighter means a smaller number. 15 grams is the smallest, so that is the lightest."}},
+  {id:"b9",sec:"B",q:"How much does the customer pay in total? Use the correct symbol for money.",ctx:"A customer has a £5 note, a £2 coin and a £1 coin.",audio:"A customer has a 5 pound note, a 2 pound coin, and a 1 pound coin. How much does the customer pay in total? Use the pound sign.",check:(a)=>norm(a.b9)==="8",fb:{ok:"Excellent! 5 plus 2 plus 1 equals 8 pounds.",bad:"Add the amounts. 5 plus 2 plus 1 equals 8 pounds. Don't forget the pound sign."}},
+  {id:"b10",sec:"B",q:"How does Priya write this?",ctx:"Priya takes 4 away from 9 and gets 5.",audio:"Priya takes 4 away from 9 and gets 5. How does Priya write this?",check:(a)=>a.b10===2,fb:{ok:"Well done! Taking 4 away from 9 is written as 9 minus 4 equals 5.",bad:"When we take away, we use a minus sign. The correct way is 9 minus 4 equals 5."}},
+  {id:"b11",sec:"B",q:"How many flower pots are on the table?",ctx:"Priya puts flower pots on a table.",audio:"Priya puts flower pots on a table. Look at the picture and count all the flower pots.",check:(a)=>(a.b11||"").trim()==="9",fb:{ok:"Correct! There are 9 flower pots.",bad:"Count carefully — 5 on the top row and 4 on the bottom row makes 9 altogether."}},
+  {id:"b12",sec:"B",q:"Show how Priya can check her answer.",ctx:null,audio:"Priya works out 14 plus 3 equals 17. She can check her answer in a different way. Show how she can check.",check:(a)=>{const b=norm(a.b12);return b.includes("17")&&b.includes("-");},fb:{ok:"Great checking! Using subtraction proves the addition was right.",bad:"To check an addition, use subtraction. For example, 17 minus 3 equals 14."}},
+  {id:"b13",sec:"B",q:"How many more customers on Tuesday than Monday?",ctx:"Priya keeps a tally chart of customers each day.",audio:"Priya keeps a tally chart. Monday has 6 customers. Tuesday has 8 customers. How many more customers on Tuesday than on Monday?",check:(a)=>(a.b13||"").trim()==="2",fb:{ok:"Right! 8 minus 6 equals 2 more customers on Tuesday.",bad:"Count each tally — Monday has 6 and Tuesday has 8. 8 minus 6 equals 2 more."}},
+  {id:"b14",sec:"B",q:"There are 8 plants sold in Week 2. Finish drawing the chart.",ctx:"Priya draws a chart of plants sold each week.",audio:"Priya draws a chart of plants sold each week. Week 1 has 12 plants. Week 3 has 10 plants. There are 8 plants sold in Week 2. Finish the chart by typing 8.",check:(a)=>(a.b14||"").trim()==="8",fb:{ok:"Perfect! The bar for Week 2 reaches up to 8.",bad:"The question tells you there are 8 plants in Week 2 — type 8 in the box."}},
+];
+const MARKS={a1:1,a2:2,a3:2,b1:1,b2:1,b3:1,b4:1,b5:1,b6:1,b7:1,b8:1,b9:2,b10:1,b11:1,b12:1,b13:1,b14:1};
+
+/* ── RENDER CONTENT ── */
+const shapes=[
+  {label:"Rectangle",el:React.createElement("svg",{width:88,height:52,viewBox:"0 0 88 52"},React.createElement("rect",{x:4,y:4,width:80,height:44,fill:"var(--color-background-secondary)",stroke:"currentColor",strokeWidth:2.5}))},
+  {label:"Circle",el:React.createElement("svg",{width:58,height:58,viewBox:"0 0 58 58"},React.createElement("circle",{cx:29,cy:29,r:25,fill:"var(--color-background-secondary)",stroke:"currentColor",strokeWidth:2.5}))},
+  {label:"Triangle",el:React.createElement("svg",{width:70,height:62,viewBox:"0 0 70 62"},React.createElement("polygon",{points:"35,4 66,58 4,58",fill:"var(--color-background-secondary)",stroke:"currentColor",strokeWidth:2.5}))},
+  {label:"Pentagon",el:React.createElement("svg",{width:60,height:62,viewBox:"0 0 60 62"},React.createElement("polygon",{points:"30,3 57,20 47,58 13,58 3,20",fill:"var(--color-background-secondary)",stroke:"currentColor",strokeWidth:2.5}))},
+];
+
+function Tally({count}){
+  const lines=[];let x=4;
+  for(let i=0;i<count;i++){
+    if(i%5<4){lines.push(React.createElement("line",{key:i,x1:x,y1:4,x2:x,y2:26,stroke:"currentColor",strokeWidth:2.5}));x+=12;}
+    else{lines.push(React.createElement("line",{key:i,x1:x-50,y1:25,x2:x+4,y2:5,stroke:"currentColor",strokeWidth:2.5}));x+=16;}
+  }
+  return React.createElement("svg",{width:x+4,height:32,style:{display:"inline-block",verticalAlign:"middle",color:"var(--color-text-primary)"}},lines);
+}
+
+function Clock({hour}){
+  const c=58,ang=a=>(a-90)*Math.PI/180,pt=(a,r)=>[c+r*Math.cos(ang(a)),c+r*Math.sin(ang(a))];
+  const[hx,hy]=pt((hour%12)*30,26),[mx,my]=pt(0,40);
+  const ticks=[...Array(12)].map((_,i)=>{const[x1,y1]=pt(i*30,46),[x2,y2]=pt(i*30,53);return React.createElement("line",{key:i,x1,y1,x2,y2,stroke:"var(--color-text-primary)",strokeWidth:i%3===0?3:1.5});});
+  const nums=[12,1,2,3,4,5,6,7,8,9,10,11].map((n,i)=>{const[x,y]=pt(i*30,35);return React.createElement("text",{key:n,x,y,textAnchor:"middle",dominantBaseline:"middle",fontSize:12,fontWeight:"600",fill:"var(--color-text-primary)"},n);});
+  return React.createElement("svg",{width:116,height:116,viewBox:"0 0 116 116"},
+    React.createElement("circle",{cx:c,cy:c,r:54,fill:"var(--color-background-primary)",stroke:"var(--q-blue)",strokeWidth:3}),
+    ...ticks,...nums,
+    React.createElement("line",{x1:c,y1:c,x2:hx,y2:hy,stroke:"var(--color-text-primary)",strokeWidth:5,strokeLinecap:"round"}),
+    React.createElement("line",{x1:c,y1:c,x2:mx,y2:my,stroke:"var(--color-text-primary)",strokeWidth:3,strokeLinecap:"round"}),
+    React.createElement("circle",{cx:c,cy:c,r:4,fill:"var(--q-blue)"})
+  );
+}
+
+function MyMC({opts,sel,onSel,locked,cols=2}){
+  return React.createElement("div",{className:`mc-grid${cols===2?" cols2":""}`},
+    opts.map((o,i)=>React.createElement("div",{key:i,
+      className:"mc-opt"+(sel===i?" sel":"")+(locked?" locked":""),
+      onClick:()=>!locked&&onSel(i)},
+      React.createElement("div",{className:"mc-dot"}),
+      React.createElement("span",null,o)
+    ))
+  );
+}
+
+function renderContent(q,ans,set,locked){
+  const id=q.id;
+  const Inp=(props)=>React.createElement("input",{...props,className:"inp",disabled:locked});
+  if(id==="a1")return React.createElement("div",null,
+    React.createElement(Inp,{type:"number",placeholder:"Type your answer",value:ans.a1||"",onChange:e=>set("a1",e.target.value),style:{width:"160px"}})
+  );
+  if(id==="a2")return React.createElement("div",null,
+    React.createElement("p",{style:{fontSize:"var(--fs-sm)",color:"var(--color-text-secondary)",marginBottom:"8px"}},"Show your working:"),
+    React.createElement(Inp,{type:"text",placeholder:"e.g. 20 − 8 = ?",value:ans.a2w||"",onChange:e=>set("a2w",e.target.value),style:{display:"block",width:"100%",maxWidth:"260px",marginBottom:"12px"}}),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",value:ans.a2n||"",onChange:e=>set("a2n",e.target.value),style:{width:"90px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"plant labels left")
+    ),
+    React.createElement("p",{style:{fontSize:"var(--fs-base)",fontWeight:"600",marginBottom:"10px",color:"var(--q-blue)"}},"Is Priya correct?"),
+    React.createElement("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap"}},
+      ["Yes","No"].map(v=>React.createElement("label",{key:v,style:{display:"flex",alignItems:"center",gap:"10px",cursor:locked?"default":"pointer",fontSize:"var(--fs-md)",padding:"12px 22px",border:ans.a2yn===v.toLowerCase()?"2px solid var(--q-blue)":"2px solid var(--color-border-secondary)",borderRadius:"var(--radius-sm)",background:ans.a2yn===v.toLowerCase()?"var(--q-blue-bg)":"var(--color-background-primary)",minHeight:"var(--touch)",fontWeight:ans.a2yn===v.toLowerCase()?"700":"400",color:ans.a2yn===v.toLowerCase()?"var(--q-blue)":"var(--color-text-primary)"}},
+        React.createElement("input",{type:"radio",name:"a2yn",checked:ans.a2yn===v.toLowerCase(),onChange:()=>{},onClick:()=>!locked&&set("a2yn",v.toLowerCase()),disabled:locked,style:{width:18,height:18}}),v
+      ))
+    )
+  );
+  if(id==="a3")return React.createElement("div",null,
+    React.createElement(Inp,{type:"text",placeholder:"Working e.g. 6 + 7 = ?",value:ans.a3w||"",onChange:e=>set("a3w",e.target.value),style:{display:"block",width:"100%",maxWidth:"260px",marginBottom:"12px"}}),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",placeholder:"Total",value:ans.a3||"",onChange:e=>set("a3",e.target.value),style:{width:"110px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"rows of seeds")
+    )
+  );
+  if(id==="b1")return React.createElement(MyMC,{opts:["Sunday","Tuesday","Wednesday","Friday"],sel:ans.b1i,locked,onSel:i=>{set("b1i",i);set("b1",["sunday","tuesday","wednesday","friday"][i]);}});
+  if(id==="b2")return React.createElement("div",null,
+    React.createElement(Clock,{hour:9}),
+    React.createElement("div",{style:{marginTop:"14px",display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",placeholder:"?",value:ans.b2||"",onChange:e=>set("b2",e.target.value),style:{width:"90px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"o'clock")
+    )
+  );
+  if(id==="b3")return React.createElement("div",{className:"shape-grid"},
+    shapes.map(({label,el},i)=>React.createElement("div",{key:i,
+      className:"shape-opt"+(ans.b3===i?" sel":"")+(locked?" locked":""),
+      onClick:()=>!locked&&set("b3",i)},
+      el,React.createElement("span",{className:"shape-label"},label)
+    ))
+  );
+  if(id==="b4")return React.createElement("div",null,
+    React.createElement("div",{style:{padding:"12px 16px",background:"var(--q-blue-bg)",borderRadius:"var(--radius-sm)",marginBottom:"16px",fontSize:"var(--fs-base)",fontWeight:"600",color:"var(--q-blue)",border:"2px solid #bfdbfe"}},"17 roses · 9 pansies · 14 dahlias · 11 begonias"),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement("span",{style:{fontSize:"var(--fs-sm)",color:"var(--color-text-secondary)"}},"smallest →"),
+      ["b4_1","b4_2","b4_3","b4_4"].map(k=>React.createElement(Inp,{key:k,type:"number",value:ans[k]||"",onChange:e=>set(k,e.target.value),style:{width:"70px"}})),
+      React.createElement("span",{style:{fontSize:"var(--fs-sm)",color:"var(--color-text-secondary)"}},"← largest")
+    )
+  );
+  if(id==="b5")return React.createElement("div",null,
+    React.createElement("svg",{width:"100%",height:"auto",viewBox:"0 0 300 180",style:{border:"2px solid var(--color-border-tertiary)",borderRadius:"var(--radius-sm)",background:"var(--color-background-secondary)",display:"block",marginBottom:"14px",maxWidth:"300px"}},
+      React.createElement("rect",{x:"20",y:"88",width:"260",height:"12",fill:"#c09050",stroke:"#8b6320",strokeWidth:1.5,rx:2}),
+      React.createElement("rect",{x:"28",y:"100",width:"10",height:"66",fill:"#c09050",stroke:"#8b6320",strokeWidth:1}),
+      React.createElement("rect",{x:"262",y:"100",width:"10",height:"66",fill:"#c09050",stroke:"#8b6320",strokeWidth:1}),
+      React.createElement("g",{transform:"translate(50,22)"},React.createElement("polygon",{points:"2,10 36,10 32,66 6,66",fill:"#b06030",stroke:"#7a3e18",strokeWidth:1.5}),React.createElement("rect",{x:0,y:9,width:38,height:8,fill:"#c87040",stroke:"#7a3e18",strokeWidth:1}),React.createElement("line",{x1:19,y1:9,x2:19,y2:-8,stroke:"#3a7d44",strokeWidth:3}),React.createElement("circle",{cx:19,cy:-20,r:14,fill:"#4caf50"})),
+      React.createElement("g",{transform:"translate(178,18)"},React.createElement("ellipse",{cx:28,cy:68,rx:28,ry:18,fill:"#5b8dd9",stroke:"#3a6ab8",strokeWidth:1.5}),React.createElement("rect",{x:0,y:56,width:56,height:12,fill:"#5b8dd9",stroke:"#3a6ab8",strokeWidth:1}),React.createElement("line",{x1:56,y1:62,x2:82,y2:52,stroke:"#5b8dd9",strokeWidth:3})),
+      React.createElement("g",{transform:"translate(136,122) rotate(-18)"},React.createElement("rect",{x:-5,y:-32,width:10,height:32,fill:"#8b5a2b",rx:2}),React.createElement("polygon",{points:"-9,-32 9,-32 12,-60 -12,-60",fill:"#a0a0a0",stroke:"#666",strokeWidth:1.5})),
+      React.createElement("text",{x:136,y:116,fontSize:10,fill:"var(--color-text-secondary)",textAnchor:"middle"},"↑ trowel")
+    ),
+    React.createElement(MyMC,{opts:["above the watering can","on top of the pot","under the shelf","to the right of the shelf"],sel:ans.b5,locked,onSel:i=>set("b5",i),cols:1})
+  );
+  if(id==="b6")return React.createElement("div",null,
+    React.createElement("div",{style:{border:"2px solid var(--color-border-secondary)",borderRadius:"var(--radius-sm)",padding:"12px 16px",background:"var(--color-background-primary)",marginBottom:"16px",maxWidth:240}},
+      [["seeds","£2"],["trowel","£5"],["plant pot","£3"],["compost","£8"],["watering can","£7"]].map(([item,price])=>
+        React.createElement("div",{key:item,style:{display:"flex",justifyContent:"space-between",padding:"8px 0",borderBottom:"1px solid var(--color-border-tertiary)",fontSize:"var(--fs-base)"}},
+          React.createElement("span",null,item),React.createElement("span",{style:{fontWeight:"700",color:"var(--q-blue)"}},price)
+        )
+      )
+    ),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement("span",{style:{fontSize:"var(--fs-lg)",fontWeight:"700",color:"var(--q-blue)"}},"£"),
+      React.createElement(Inp,{type:"number",value:ans.b6||"",onChange:e=>set("b6",e.target.value),style:{width:"100px"}})
+    )
+  );
+  if(id==="b7")return React.createElement("div",null,
+    React.createElement("svg",{width:"100%",height:"auto",viewBox:"0 0 260 120",style:{border:"2px solid #86efac",borderRadius:"var(--radius-sm)",background:"#f0fdf4",display:"block",marginBottom:"14px",maxWidth:"260px"}},
+      [[16,10],[72,10],[128,10],[184,10],[16,68],[72,68],[128,68],[184,68]].map(([x,y],i)=>
+        React.createElement("g",{key:i,transform:`translate(${x},${y})`},
+          React.createElement("ellipse",{cx:14,cy:18,rx:13,ry:15,fill:"#dc2626"}),
+          React.createElement("circle",{cx:14,cy:5,r:7,fill:"#111"}),
+          React.createElement("line",{x1:14,y1:9,x2:14,y2:33,stroke:"#111",strokeWidth:1.5}),
+          React.createElement("circle",{cx:7,cy:16,r:3.5,fill:"#111"}),
+          React.createElement("circle",{cx:21,cy:16,r:3.5,fill:"#111"}),
+          React.createElement("circle",{cx:7,cy:25,r:3.5,fill:"#111"}),
+          React.createElement("circle",{cx:21,cy:25,r:3.5,fill:"#111"})
+        )
+      )
+    ),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",value:ans.b7||"",onChange:e=>set("b7",e.target.value),style:{width:"100px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"ladybirds")
+    )
+  );
+  if(id==="b8")return React.createElement(MyMC,{opts:["24 g","18 g","15 g","21 g"],sel:ans.b8,locked,onSel:i=>set("b8",i)});
+  if(id==="b9")return React.createElement("div",null,
+    React.createElement("svg",{width:"100%",height:"auto",viewBox:"0 0 280 110",style:{border:"2px solid var(--color-border-tertiary)",borderRadius:"var(--radius-sm)",background:"var(--color-background-secondary)",display:"block",marginBottom:"16px",maxWidth:"280px"}},
+      React.createElement("rect",{x:10,y:22,width:95,height:55,rx:4,fill:"#16803d",stroke:"#14532d",strokeWidth:1.5}),
+      React.createElement("text",{x:58,y:43,textAnchor:"middle",fontSize:16,fontWeight:"700",fill:"#fff"},"£5"),
+      React.createElement("text",{x:58,y:60,textAnchor:"middle",fontSize:9,fill:"#bbf7d0"},"FIVE POUNDS"),
+      React.createElement("circle",{cx:170,cy:49,r:30,fill:"#b8963e",stroke:"#8b6914",strokeWidth:2}),
+      React.createElement("circle",{cx:170,cy:49,r:21,fill:"#d4af37",stroke:"#8b6914",strokeWidth:1}),
+      React.createElement("text",{x:170,y:54,textAnchor:"middle",fontSize:15,fontWeight:"700",fill:"#3d2a00"},"£2"),
+      React.createElement("circle",{cx:240,cy:49,r:24,fill:"#d4af37",stroke:"#8b6914",strokeWidth:2}),
+      React.createElement("text",{x:240,y:54,textAnchor:"middle",fontSize:15,fontWeight:"700",fill:"#3d2a00"},"£1")
+    ),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"8px",flexWrap:"wrap"}},
+      React.createElement("span",{style:{fontSize:"var(--fs-lg)",fontWeight:"700",color:"var(--q-blue)"}},"Total: £"),
+      React.createElement(Inp,{type:"text",placeholder:"e.g. 8",value:(ans.b9||"").replace("£",""),onChange:e=>set("b9","£"+e.target.value.replace("£","")),style:{width:"110px"}})
+    )
+  );
+  if(id==="b10")return React.createElement(MyMC,{opts:["4 + 9 = 5","4 − 9 = 5","9 − 4 = 5","9 + 4 = 5"],sel:ans.b10,locked,onSel:i=>set("b10",i)});
+  if(id==="b11")return React.createElement("div",null,
+    React.createElement("svg",{width:"100%",height:"auto",viewBox:"0 0 300 132",style:{border:"2px solid var(--color-border-tertiary)",borderRadius:"var(--radius-sm)",background:"var(--color-background-secondary)",display:"block",marginBottom:"14px",maxWidth:"300px"}},
+      [[14,16],[68,13],[122,17],[176,12],[230,15],[42,74],[96,76],[150,71],[204,74]].map(([x,y],i)=>
+        React.createElement("g",{key:i,transform:`translate(${x},${y})`},
+          React.createElement("polygon",{points:"2,10 32,10 28,44 6,44",fill:"#b06030",stroke:"#7a3e18",strokeWidth:1.5}),
+          React.createElement("rect",{x:0,y:8,width:34,height:8,rx:1,fill:"#c87040",stroke:"#7a3e18",strokeWidth:1}),
+          React.createElement("line",{x1:17,y1:8,x2:17,y2:-4,stroke:"#3a7d44",strokeWidth:3}),
+          React.createElement("circle",{cx:10,cy:-12,r:8,fill:"#f4d03f"}),
+          React.createElement("circle",{cx:24,cy:-12,r:8,fill:"#f4d03f"}),
+          React.createElement("circle",{cx:17,cy:-22,r:8,fill:"#f4d03f"}),
+          React.createElement("circle",{cx:17,cy:-5,r:5,fill:"#e07b39"})
+        )
+      )
+    ),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",value:ans.b11||"",onChange:e=>set("b11",e.target.value),style:{width:"100px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"flower pots")
+    )
+  );
+  if(id==="b12")return React.createElement("div",null,
+    React.createElement("div",{style:{textAlign:"center",padding:"16px",fontSize:"var(--fs-xl)",fontWeight:"800",marginBottom:"16px",border:"2px solid #bfdbfe",borderRadius:"var(--radius-sm)",background:"var(--q-blue-bg)",color:"var(--q-blue)"}},"14 + 3 = 17"),
+    React.createElement("p",{style:{marginBottom:"10px",fontSize:"var(--fs-base)",color:"var(--color-text-secondary)"}},"Show a different way to check:"),
+    React.createElement(Inp,{type:"text",placeholder:"e.g. 17 − 3 = 14",value:ans.b12||"",onChange:e=>set("b12",e.target.value),style:{width:"100%",maxWidth:"260px"}})
+  );
+  if(id==="b13")return React.createElement("div",null,
+    React.createElement("div",{style:{border:"2px solid var(--color-border-secondary)",borderRadius:"var(--radius-sm)",overflow:"hidden",marginBottom:"16px",display:"inline-block"}},
+      [["Monday",6],["Tuesday",8]].map(([day,cnt])=>
+        React.createElement("div",{key:day,style:{display:"flex",alignItems:"center",borderBottom:day==="Monday"?"2px solid var(--color-border-secondary)":"none"}},
+          React.createElement("div",{style:{padding:"12px 20px",borderRight:"2px solid var(--color-border-secondary)",minWidth:"110px",fontWeight:"700",fontSize:"var(--fs-base)",color:"var(--q-blue)"}},day),
+          React.createElement("div",{style:{padding:"12px 22px"}},React.createElement(Tally,{count:cnt}))
+        )
+      )
+    ),
+    React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+      React.createElement(Inp,{type:"number",value:ans.b13||"",onChange:e=>set("b13",e.target.value),style:{width:"100px"}}),
+      React.createElement("span",{style:{fontSize:"var(--fs-base)"}},"more customers")
+    )
+  );
+  if(id==="b14"){
+    const p=parseInt(ans.b14)||0,bh=v=>(v/14)*120,by=v=>140-bh(v);
+    return React.createElement("div",{style:{display:"flex",gap:"20px",flexWrap:"wrap",alignItems:"flex-start"}},
+      React.createElement("svg",{width:"230",height:"180",viewBox:"0 0 230 180"},
+        React.createElement("line",{x1:35,y1:15,x2:35,y2:145,stroke:"var(--color-text-primary)",strokeWidth:2}),
+        React.createElement("line",{x1:35,y1:145,x2:215,y2:145,stroke:"var(--color-text-primary)",strokeWidth:2}),
+        ...[0,2,4,6,8,10,12,14].map(v=>{const yv=140-(v/14)*120;return React.createElement("g",{key:v},React.createElement("line",{x1:31,y1:yv,x2:35,y2:yv,stroke:"var(--color-text-primary)",strokeWidth:1}),React.createElement("text",{x:28,y:yv+4,textAnchor:"end",fontSize:11,fontWeight:"600",fill:"var(--q-blue)"},v));}),
+        React.createElement("text",{x:120,y:11,textAnchor:"middle",fontSize:11,fontWeight:"700",fill:"var(--q-blue)"},"Plants sold each week"),
+        React.createElement("rect",{x:45,y:by(12),width:40,height:bh(12),fill:"#bfdbfe",stroke:"var(--q-blue)",strokeWidth:1.5}),
+        p>0&&p<=14?React.createElement("rect",{x:100,y:by(p),width:40,height:bh(p),fill:"#bbf7d0",stroke:"#16a34a",strokeWidth:1.5}):null,
+        React.createElement("rect",{x:155,y:by(10),width:40,height:bh(10),fill:"#bfdbfe",stroke:"var(--q-blue)",strokeWidth:1.5}),
+        React.createElement("text",{x:65,y:162,textAnchor:"middle",fontSize:10,fill:"var(--color-text-secondary)"},"Week 1"),
+        React.createElement("text",{x:120,y:162,textAnchor:"middle",fontSize:10,fill:"var(--color-text-secondary)"},"Week 2"),
+        React.createElement("text",{x:175,y:162,textAnchor:"middle",fontSize:10,fill:"var(--color-text-secondary)"},"Week 3")
+      ),
+      React.createElement("div",null,
+        React.createElement("p",{style:{fontSize:"var(--fs-base)",marginBottom:"10px",color:"var(--color-text-secondary)"}},"Type the value for Week 2:"),
+        React.createElement(Inp,{type:"number",placeholder:"?",value:ans.b14||"",onChange:e=>set("b14",e.target.value),style:{width:"120px"}}),
+        p>0&&React.createElement("p",{style:{marginTop:"8px",fontSize:"var(--fs-sm)",color:"#16a34a",fontWeight:"600"}},"✓ Bar drawn!")
+      )
+    );
+  }
+  return null;
+}
+
+/* ── MAIN APP ── */
+function App(){
+  const [screen,setScreen]=useState("cover");
+  const [qi,setQi]=useState(0);
+  const [ans,setAns]=useState({});
+  const [checked,setChecked]=useState({});
+  const set=(k,v)=>setAns(p=>({...p,[k]:v}));
+  const q=QUESTIONS[qi];
+  const locked=checked[q?.id]!==undefined;
+  const isCorrect=id=>QUESTIONS.find(x=>x.id===id)?.check(ans)??false;
+
+  const doCheck=()=>{
+    const c=q.check(ans);
+    setChecked(p=>({...p,[q.id]:c}));
+    speakGB(c?q.fb.ok:q.fb.bad);
+  };
+
+  /* COVER */
+  if(screen==="cover"){
+    const attempted=QUESTIONS.filter(q=>checked[q.id]!==undefined).length;
+    const pct=Math.round(attempted/17*100);
+    function TopicCard({icon,label,desc,qIdx}){
+      const id=QUESTIONS[qIdx].id;
+      const done=checked[id];
+      return React.createElement("div",{className:"topic-card",onClick:()=>{setQi(qIdx);setScreen("exam");}},
+        React.createElement("span",{className:"topic-icon"},icon),
+        attempted>0&&done!==undefined&&React.createElement("span",{className:"pill "+(done?"ok":"bad"),style:{marginBottom:"4px",fontSize:"12px"}},done?"✓ Done":"✗ Try again"),
+        React.createElement("span",{className:"topic-label"},label),
+        React.createElement("span",{className:"topic-desc"},desc)
+      );
+    }
+    return React.createElement("div",{className:"wrap"},
+      React.createElement("div",{style:{textAlign:"center",padding:"20px 0 28px"}},
+        React.createElement("p",{style:{fontSize:"var(--fs-xs)",color:"var(--color-text-secondary)",letterSpacing:"0.08em",textTransform:"uppercase",marginBottom:"8px"}},"Pearson Edexcel Functional Skills"),
+        React.createElement("h1",{style:{fontSize:"var(--fs-2xl)",fontWeight:"800",color:"var(--q-blue)",marginBottom:"6px",lineHeight:1.2}},"Entry 1 Mathematics"),
+        React.createElement("p",{style:{fontSize:"var(--fs-md)",color:"var(--color-text-secondary)",marginBottom:"20px"}},"Practice Paper · Garden Centre"),
+        attempted>0&&React.createElement("div",{style:{display:"inline-block",padding:"10px 20px",borderRadius:var_radius,background:"var(--color-background-secondary)",border:"2px solid var(--color-border-tertiary)",marginBottom:"20px",minWidth:"220px"}},
+          React.createElement("div",{style:{height:"10px",borderRadius:"5px",background:"var(--color-border-tertiary)",overflow:"hidden",marginBottom:"8px"}},
+            React.createElement("div",{style:{height:"100%",width:pct+"%",background:"var(--q-blue)",borderRadius:"5px",transition:"width 0.3s"}})
+          ),
+          React.createElement("p",{style:{fontSize:"var(--fs-base)",fontWeight:"700",color:"var(--q-blue)",textAlign:"center"}},attempted+"/17 questions answered")
+        ),
+        React.createElement("br",null),
+        React.createElement("button",{style:{padding:"16px 40px",fontSize:"var(--fs-md)",fontWeight:"700",border:"none",borderRadius:"var(--radius-sm)",background:"var(--q-blue)",color:"#fff",cursor:"pointer",minHeight:"var(--touch)",letterSpacing:"0.02em"},onClick:()=>{const fi=QUESTIONS.findIndex(q=>checked[q.id]===undefined);setQi(fi>=0?fi:0);setScreen("exam");}},
+          attempted===0?"Start the paper →":attempted===17?"Review all answers →":"Continue where I left off →"
+        )
+      ),
+
+      React.createElement("div",{style:{marginBottom:"22px"}},
+        React.createElement("div",{className:"sec-hdr a"},
+          React.createElement("div",null,
+            React.createElement("div",{className:"sec-hdr-label"},"Section A"),
+            React.createElement("div",{className:"sec-hdr-sub"},"No calculator · 20 minutes")
+          ),
+          React.createElement("span",{className:"sec-badge"},"A")
+        ),
+        React.createElement("div",{className:"topic-grid"},
+          TOPICS_A.map(t=>React.createElement(TopicCard,{key:t.qIdx,...t}))
+        )
+      ),
+
+      React.createElement("div",null,
+        React.createElement("div",{className:"sec-hdr b"},
+          React.createElement("div",null,
+            React.createElement("div",{className:"sec-hdr-label"},"Section B"),
+            React.createElement("div",{className:"sec-hdr-sub"},"Calculator allowed · 60 minutes")
+          ),
+          React.createElement("span",{className:"sec-badge"},"B")
+        ),
+        React.createElement("div",{className:"topic-grid"},
+          TOPICS_B.map(t=>React.createElement(TopicCard,{key:t.qIdx,...t}))
+        )
+      )
+    );
+  }
+
+  /* EXAM */
+  if(screen==="exam"){
+    const total=QUESTIONS.length;
+    const pct=(qi/total)*100;
+    const prevSec=qi>0?QUESTIONS[qi-1].sec:null;
+    const sectionChange=prevSec&&prevSec!==q.sec;
+    return React.createElement("div",{className:"wrap"},
+      React.createElement("div",{className:"back-bar",onClick:()=>{stopGB();setScreen("cover");}},
+        React.createElement("span",{className:"back-bar-arrow"},"←"),
+        React.createElement("div",{style:{flex:1}},
+          React.createElement("div",{className:"back-bar-title"},"Back to all topics"),
+          React.createElement("div",{className:"back-bar-sub"},"Your progress is saved — tap any topic to jump to it")
+        ),
+        React.createElement("span",{className:"pill sec-"+(q.sec.toLowerCase())},"Q "+(qi+1)+"/"+total)
+      ),
+
+      React.createElement("div",{className:"prog-bar-wrap"},
+        React.createElement("div",{className:"prog-bar",style:{width:pct+"%"}})
+      ),
+
+      sectionChange&&React.createElement("div",{className:"sec-hdr b",style:{marginBottom:"14px"}},
+        React.createElement("div",null,
+          React.createElement("div",{className:"sec-hdr-label"},"Now starting Section B"),
+          React.createElement("div",{className:"sec-hdr-sub"},"You may use a calculator from here")
+        ),
+        React.createElement("span",{style:{fontSize:"28px"}},"🧮")
+      ),
+
+      React.createElement("div",{className:"qbox"+(checked[q.id]===true?" correct":checked[q.id]===false?" wrong":"")},
+        React.createElement("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"12px",flexWrap:"wrap",gap:"10px"}},
+          React.createElement("div",{style:{display:"flex",alignItems:"center",gap:"10px",flexWrap:"wrap"}},
+            React.createElement("span",{className:"qbox-num"},"Question "+(qi+1)),
+            React.createElement("span",{className:"pill sec-"+(q.sec.toLowerCase())},"Section "+q.sec),
+            checked[q.id]!==undefined&&React.createElement("span",{className:"pill "+(checked[q.id]?"ok":"bad")},checked[q.id]?"✓ Correct":"✗ Incorrect")
+          ),
+          React.createElement(SpeakBtn,{text:q.audio})
+        ),
+        q.ctx&&React.createElement("p",{className:"qbox-ctx"},q.ctx),
+        React.createElement("p",{className:"qbox-q"},q.q),
+        React.createElement("div",{className:"qbox-divider"},renderContent(q,ans,set,locked))
+      ),
+
+      !locked&&React.createElement("button",{className:"btn-check",onClick:doCheck},"Check my answer ✓"),
+
+      locked&&React.createElement("div",{className:"feedback "+(checked[q.id]?"ok":"bad")},
+        React.createElement("span",{className:"feedback-icon"},checked[q.id]?"✅":"❌"),
+        React.createElement("div",{style:{flex:1}},
+          React.createElement("div",{className:"feedback-title"},checked[q.id]?"Correct! Well done!":"Not quite this time."),
+          React.createElement("div",{className:"feedback-text"},q.fb[checked[q.id]?"ok":"bad"])
+        ),
+        React.createElement(SpeakBtn,{text:q.fb[checked[q.id]?"ok":"bad"]})
+      ),
+
+      React.createElement("div",{style:{display:"flex",gap:"10px",marginTop:"4px"}},
+        React.createElement("button",{className:"btn-nav outline",style:{opacity:qi===0?0.35:1,cursor:qi===0?"default":"pointer"},onClick:()=>{if(qi>0){stopGB();setQi(qi-1);}},disabled:qi===0},"← Back"),
+        React.createElement("div",{style:{flex:1}}),
+        qi<total-1
+          ?React.createElement("button",{className:"btn-nav solid",style:{opacity:!locked?0.35:1,cursor:!locked?"default":"pointer"},onClick:()=>{if(locked){stopGB();setQi(qi+1);}},disabled:!locked},"Next question →")
+          :React.createElement("button",{className:"btn-nav solid",style:{opacity:!locked?0.35:1,cursor:!locked?"default":"pointer"},onClick:()=>{if(locked){stopGB();setScreen("results");}},disabled:!locked},"See my results →")
+      )
+    );
+  }
+
+  /* RESULTS */
+  if(screen==="results"){
+    const allIds=QUESTIONS.map(q=>q.id);
+    let total=0,maxT=0;
+    allIds.forEach(id=>{maxT+=MARKS[id];if(isCorrect(id))total+=MARKS[id];});
+    const sa=["a1","a2","a3"].reduce((s,id)=>s+(isCorrect(id)?MARKS[id]:0),0);
+    const sb=allIds.filter(id=>id.startsWith("b")).reduce((s,id)=>s+(isCorrect(id)?MARKS[id]:0),0);
+    const pct=Math.round(total/maxT*100);
+    const pass=total>=14;
+    const msg=total>=18?"Excellent work — a brilliant score! 🌟":total>=14?"Well done — a solid pass! 👏":total>=10?"Good effort — keep practising and you'll get there! 💪":"Don't worry — have another go and you'll improve! 📚";
+    const correctAnswers={a1:"19",a2:"12 labels — No",a3:"13 rows",b1:"Wednesday",b2:"9 o'clock",b3:"Rectangle",b4:"9, 11, 14, 17",b5:"Under the shelf",b6:"£5",b7:"8 ladybirds",b8:"15 g",b9:"£8",b10:"9 − 4 = 5",b11:"9 pots",b12:"17 − 3 = 14",b13:"2 more",b14:"8"};
+    useEffect(()=>{speakGB(`You scored ${total} out of ${maxT}. Section A: ${sa} out of 5. Section B: ${sb} out of 15. ${pct} percent. ${msg.replace(/[🌟👏💪📚]/g,"")}`);},[]);
+    return React.createElement("div",{className:"wrap"},
+      React.createElement("div",{className:"back-bar",onClick:()=>{stopGB();setScreen("cover");}},
+        React.createElement("span",{className:"back-bar-arrow"},"←"),
+        React.createElement("div",{style:{flex:1}},
+          React.createElement("div",{className:"back-bar-title"},"Back to all topics"),
+          React.createElement("div",{className:"back-bar-sub"},"Pick any topic to practise again")
+        )
+      ),
+
+      React.createElement("div",{style:{background:"var(--color-background-primary)",border:"2px solid var(--color-border-secondary)",borderRadius:"var(--radius)",padding:"24px",marginBottom:"16px"}},
+        React.createElement("h2",{style:{fontSize:"var(--fs-xl)",fontWeight:"800",color:"var(--q-blue)",marginBottom:"18px"}},"Your results"),
+        React.createElement("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"12px",marginBottom:"18px"}},
+          [["Total",`${total}/${maxT}`],["Section A",`${sa}/5`],["Section B",`${sb}/15`]].map(([l,v])=>
+            React.createElement("div",{key:l,className:"score-card"},
+              React.createElement("div",{className:"score-num"},v),
+              React.createElement("div",{className:"score-lbl"},l)
+            )
+          )
+        ),
+        React.createElement("div",{style:{height:"12px",borderRadius:"6px",background:"var(--color-background-secondary)",overflow:"hidden",marginBottom:"14px"}},
+          React.createElement("div",{style:{height:"100%",width:pct+"%",background:pass?"#16a34a":"#f59e0b",borderRadius:"6px",transition:"width 0.8s"}})
+        ),
+        React.createElement("p",{style:{fontSize:"var(--fs-md)",fontWeight:"700",color:pass?"#15803d":"#b45309",lineHeight:1.5}},msg),
+        React.createElement("div",{style:{marginTop:"12px"}},React.createElement(SpeakBtn,{text:`You scored ${total} out of ${maxT}. ${msg.replace(/[🌟👏💪📚]/g,"")}`}))
+      ),
+
+      React.createElement("div",{style:{background:"var(--color-background-primary)",border:"2px solid var(--color-border-secondary)",borderRadius:"var(--radius)",padding:"20px 18px",marginBottom:"16px"}},
+        React.createElement("h3",{style:{fontSize:"var(--fs-lg)",fontWeight:"700",color:"var(--q-blue)",marginBottom:"14px"}},"Question by question"),
+        QUESTIONS.map((q,i)=>{
+          const c=isCorrect(q.id);
+          return React.createElement("div",{key:q.id,className:"result-row",onClick:()=>{setQi(i);setScreen("exam");}},
+            React.createElement("span",{className:"result-num "+(c?"ok":"bad")},i+1),
+            React.createElement("div",{style:{flex:1,minWidth:0}},
+              React.createElement("p",{className:"result-q"},q.q),
+              !c&&React.createElement("p",{className:"result-ans"},"✏️ Answer: "+correctAnswers[q.id])
+            ),
+            React.createElement("span",{style:{fontSize:"var(--fs-xs)",color:"var(--color-text-secondary)",marginRight:"6px",flexShrink:0}},"Review"),
+            React.createElement("span",{className:"result-tick "+(c?"ok":"bad")},c?"✓":"✗")
+          );
+        })
+      ),
+
+      React.createElement("div",{style:{display:"flex",gap:"12px",flexWrap:"wrap",justifyContent:"flex-end"}},
+        React.createElement("button",{className:"btn-nav outline",onClick:()=>{setAns({});setChecked({});setQi(0);setScreen("cover");}},"Start over"),
+        React.createElement("button",{className:"btn-nav solid",onClick:()=>{setChecked({});setQi(0);setScreen("exam");}},"Retake paper")
+      )
+    );
+  }
+  return null;
+}
+
+const var_radius="var(--radius)";
+ReactDOM.render(React.createElement(App),document.getElementById("root"));
+</script>
